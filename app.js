@@ -83,6 +83,13 @@ app.get('/logout', function (req, res, next) {
   res.redirect('/')
 })
 
+/**
+ * 404 Redirection.
+ */
+app.all('*', function (req, res, next) {
+  res.redirect('/')
+})
+
 
 /**
  * Sign new session id.
