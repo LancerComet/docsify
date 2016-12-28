@@ -22,18 +22,13 @@ app.use(express.static('public'))
  */
 const keepItSecret = true   // Visitors need to provide correct password if it is set to true.
 const password = 'test'     // Password.
-const sessionPool = []      // Session Storage.
 
 /**
- * Server Configuration.
+ * Session Configuration.
  */
-const port = 3000           // Port.
-const hostname = '0.0.0.0'  // Hostname.
-
-/**
- * Create Static Server.
- */
-app.listen(port, hostname)
+const sessionExpiringTiming = 1000 * 60 * 120  // Session Expiring Timing.
+let sessionPool = []      // Session Storage.
+sessionExpiringTiming && clearSession()  // Start Sessions Clearing Function.
 
 /**
  * Index Controller.
@@ -65,8 +60,8 @@ app.post('/password', function (req, res, next) {
     })
     res.redirect('/')
   } else {
-    res.status(400).json({
-      status: 400,
+    res.status(401).json({
+      status: 401,
       msg: 'Password is incorrect.'
     })
   }
@@ -115,14 +110,14 @@ function checkSession (sessionID) {
  * Render index and send it to client.
  */
 function renderIndex (res) {
-  res.end(fs.readFileSync(path.resolve(__dirname, './templates/dev.index.html')))
+  res.end(fs.readFileSync(path.resolve(__dirname, './templates/index.html')))
 }
 
 /**
  * Render password providing page and send it to client.
  */
 function renderPassword (res) {
-  res.end(fs.readFileSync(path.resolve(__dirname, './templates/dev.password.html')))
+  res.end(fs.readFileSync(path.resolve(__dirname, './templates/password.html')))
 }
 
 /**
@@ -134,4 +129,13 @@ function comparePassword (passwordByUser) {
   return passwordByUser === password
 }
 
-console.log(`\nListening at http://${hostname}:${port}\n`)
+/**
+ * Session Clearing Function.
+ */
+function clearSession () {
+  setInterval(function () {
+    sessionPool = []
+  }, sessionExpiringTiming)
+}
+
+module.exports = app
